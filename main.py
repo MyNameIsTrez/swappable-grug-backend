@@ -1,0 +1,3 @@
+import grug
+
+grug.hello()
