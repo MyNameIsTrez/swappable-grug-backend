@@ -1,0 +1,29 @@
+{
+	"entities": {
+		"Dog": {
+			"description": "A dog.",
+			"on_functions": {
+				"on_spawn": {
+					"description": "Called when the entity is spawned. Passed the age of the dog in years.",
+                    "arguments": [
+                        {
+                            "name": "age_in_years",
+                            "type": "i32"
+                        }
+                    ]
+				}
+			}
+		}
+	},
+	"game_functions": {
+		"print_string": {
+			"description": "Prints a string.",
+			"arguments": [
+				{
+					"name": "str",
+					"type": "string"
+				}
+			]
+		}
+	}
+}
