@@ -9,5 +9,8 @@ def get_language():
 def print_string(str):
     print(f"Same language: {str}")
 
-def do_work():
+# TODO: Should interpreters in non-systems programming languages be allowed?
+#       If so, should games be able to choose them over the default
+#       of picking the IS_SAME_LANGUAGE branch? If so, what should the API be?
+def call_interpreter():
     print("Default backend doing work")
