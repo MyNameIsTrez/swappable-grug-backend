@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile grug.c",
+            "command": "gcc",
+            "type": "shell",
+            "args": [
+                "grug/grug.c",
+                "-o",
+                "grug/grug.so",
+                "-shared",
+                "-fPIC",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-Wpedantic",
+                "-Wfatal-errors",
+                "-g",
+                "-rdynamic",
+                // "-fsanitize=address,undefined",
+            ],
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "clear": true
+            },
+            "group": "build"
+        }
+    ]
+}
