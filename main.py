@@ -1,11 +1,20 @@
 import grug
 
 
-def print_string(str):
-    print(str)
+def runtime_error_handler(reason, type, on_fn_name, on_fn_path):
+    # TODO: Check that type is not some weird ctypes thing by printing it
+    print(f"grug runtime error in {on_fn_name}(): {reason}, in {on_fn_path}")
 
 
-grug.register_game_fn(print_string)
+def print_string(string):
+    print(string)
+
+
+grug.init(runtime_error_handler, "mod_api.json", "mods", 10)
+
+grug.regenerate_modified_mods()
+
+grug.register_game_fn("print_string", print_string)
 
 mods = grug.get_mods()
 animals_mod = mods.dirs[0]
