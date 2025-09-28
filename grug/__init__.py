@@ -5,6 +5,7 @@ except ImportError:
 
 import ctypes
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Callable, List, Union
 
@@ -67,21 +68,32 @@ backend_struct = backend.get_backend_struct()
 # TODO: Let this open a dll on Windows, and a dylib on Mac
 grug_dll = ctypes.PyDLL("./grug/grug.so", os.RTLD_GLOBAL)
 
+grug_dll.grug_init.restype = ctypes.c_bool
+grug_dll.grug_init.argtypes = (
+    ctypes.c_void_p,  # grug_runtime_error_handler_t handler
+    ctypes.c_char_p,  # const char *mod_api_json_path
+    ctypes.c_char_p,  # const char *mods_dir_path
+    ctypes.c_uint64,  # uint64_t on_fn_time_limit_ms
+    # TODO: Let this file define GrugBackend, instead of backend.GrugBackend.
+    ctypes.POINTER(backend.GrugBackend),  # struct grug_backend *backend
+)
+
+grug_dll.grug_regenerate_modified_mods.restype = ctypes.c_bool
+
 
 def init(runtime_error_handler, mod_api_json_path, mods_dir_path, on_fn_time_limit_ms):
     global runtime_error_handler_
 
     runtime_error_handler_ = runtime_error_handler
 
-    grug_dll.grug_init.restype = ctypes.c_bool
     if grug_dll.grug_init(
         cfunc_runtime_error_handler,
         mod_api_json_path.encode(),
         mods_dir_path.encode(),
         on_fn_time_limit_ms,
-        backend_struct,
+        ctypes.pointer(backend_struct),
     ):
-        os.exit(1)  # TODO: Implement
+        sys.exit(1)  # TODO: Implement
 
 
 @ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p)
@@ -92,9 +104,8 @@ def cfunc_runtime_error_handler(reason, type, on_fn_name, on_fn_path):
 
 
 def regenerate_modified_mods():
-    grug_dll.grug_regenerate_modified_mods.restype = ctypes.c_bool
     if grug_dll.grug_regenerate_modified_mods():
-        os.exit(1)  # TODO: Implement
+        sys.exit(1)  # TODO: Implement
 
 
 def is_native():
@@ -106,18 +117,18 @@ def is_same_language():
 
 
 def register_game_fn(game_fn_name, game_fn):
-    os.exit(1)  # TODO: Implement
+    pass  # TODO: Implement
 
 
 def get_mods():
     # TODO: Do I have to cast this to class Dir?
-    return grug_dll.mods
+    return grug_dll.grug_mods
 
 
 def call(*args):
     print(f"args: {args}")
     if IS_NATIVE:
-        os.exit(1)  # TODO: Finish
+        sys.exit(1)  # TODO: Finish
     else:
         backend.call_interpreter()  # TODO: Finish
 

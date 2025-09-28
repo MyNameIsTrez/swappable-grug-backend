@@ -16,3 +16,11 @@ sequenceDiagram
     Frontend->>Bindings: grug_reloads_size++
     Bindings->>Game: 
 ```
+
+```mermaid
+sequenceDiagram
+    Game->>Bindings: grug.get_mods()
+    Bindings->>Frontend: return grug_dll.mods
+    Frontend->>Bindings: TODO: Should this be casted to class Dir?
+    Bindings->>Game: TODO: ?
+```
