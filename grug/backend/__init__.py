@@ -1,6 +1,8 @@
 import ctypes
 import sys
 
+InitGlobalsFn = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)
+
 
 class OnFunction(ctypes.Structure):
     _fields_ = [
@@ -15,9 +17,11 @@ class OnFunction(ctypes.Structure):
     ]
 
 
-class GrugFile(ctypes.Structure):
+class File(ctypes.Structure):
     _fields_ = [
         ("name", ctypes.c_char_p),
+        ("globals_size", ctypes.c_size_t),
+        ("init_globals_fn", InitGlobalsFn),
         ("on_fns", ctypes.POINTER(OnFunction)),
         ("on_fns_size", ctypes.c_size_t),
     ]
@@ -42,12 +46,18 @@ def get_language():
     return "python"
 
 
+@ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)
+def init_globals(g, id):
+    print("In init_globals()")
+
+
 @ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_int32)
 def on_spawn(g, age_in_years):
-    i = 0
-    while i < age_in_years:
-        print("Woof!")
-        i += 1
+    print("In on_spawn()")
+    # i = 0
+    # while i < age_in_years:
+    #     print("Woof!")
+    #     i += 1
 
 
 compiled_file = None
@@ -61,8 +71,10 @@ def compile_file(path, file_contents):
     # TODO: This OnFunction will dangle when compile_file() returns
     on_fn = OnFunction(b"on_spawn", casted)
     on_fns = ctypes.pointer(on_fn)
-    compiled_file = GrugFile(
+    compiled_file = File(
         b"labrador-Dog.grug",
+        8,
+        init_globals,
         on_fns,
         1,
     )

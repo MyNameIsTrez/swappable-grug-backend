@@ -10,49 +10,63 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, List, Union
 
 # Type alias for Python or C init function
-InitGlobalsFn = Union[
-    Callable[[object, int], None],  # Python backend
-    ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64),  # C backend
-]
+# InitGlobalsFn = Union[
+#     Callable[[object, int], None],  # Python backend
+#     ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64),  # C backend
+# ]
+InitGlobalsFn = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)
 
 
 class Globals:
-    """Opaque handle for a C-side globals array.
-
-    Python code should not create or access the array directly.
-    Only pass it back to library functions.
-    """
-
-    __slots__ = ("_array",)  # Minimize memory footprint
-
     def __init__(self, size: int):
-        # Allocate the ctypes array internally
         self._array = (ctypes.c_byte * size)()
 
     @property
-    def _as_ctypes(self):
-        """Internal: return the underlying ctypes array for library calls."""
+    def c_array(self):
         return self._array
 
 
-@dataclass
-class File:
-    name: str
-    globals_size: int
-    init_globals_fn: InitGlobalsFn
-    on_fns: Any
+# TODO:
+# Let this be dynamically generated somehow, based on mod_api.json
+# The problem though is that grug_dll.grug_regenerate_modified_mods() doesn't tell us
+# what to cast, when a new grug file is added.
+class DogOnFns(ctypes.Structure):
+    _fields_ = [
+        ("name", ctypes.c_char_p),
+        # ("spawn", ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_int32)),
+        # TODO: The bindings should wrap all on fns of a file into a dict, where fn names are keys
+        # TODO: The bindings should also cast fn_ptr to the right type, based on mod_api.json
+        ("fn_ptr", ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_int32)),
+    ]
+
+
+class File(ctypes.Structure):
+    _fields_ = [
+        ("name", ctypes.c_char_p),
+        ("globals_size", ctypes.c_size_t),
+        ("init_globals_fn", InitGlobalsFn),
+        ("on_fns", ctypes.POINTER(DogOnFns)),
+        ("on_fns_size", ctypes.c_size_t),
+    ]
 
     def create_entity(self, entity_id: int):
         g = Globals(self.globals_size)
-        self.init_globals_fn(g, entity_id)
+        ref = ctypes.byref(g.c_array)
+        self.init_globals_fn(ref, entity_id)
         return g
 
 
-@dataclass
-class Dir:
-    name: str
-    files: List[File] = field(default_factory=list)
-    dirs: List["Dir"] = field(default_factory=list)
+class Dir(ctypes.Structure):
+    pass  # Forward declare so we can self-reference
+
+
+Dir._fields_ = [
+    ("name", ctypes.c_char_p),
+    ("dirs", ctypes.POINTER(Dir)),
+    ("dirs_size", ctypes.c_size_t),
+    ("files", ctypes.POINTER(File)),
+    ("files_size", ctypes.c_size_t),
+]
 
 
 IS_NATIVE = backend.is_native()
@@ -121,8 +135,7 @@ def register_game_fn(game_fn_name, game_fn):
 
 
 def get_mods():
-    # TODO: Do I have to cast this to class Dir?
-    return grug_dll.grug_mods
+    return Dir.in_dll(grug_dll, "grug_mods")
 
 
 def call(*args):

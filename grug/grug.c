@@ -15,6 +15,8 @@ enum grug_runtime_error_type {
 
 typedef void (*grug_runtime_error_handler_t)(const char *reason, enum grug_runtime_error_type type, const char *on_fn_name, const char *on_fn_path);
 
+typedef void (*grug_init_globals_fn_t)(void *globals, uint64_t id);
+
 enum type {
 	type_void,
 	type_bool,
@@ -32,19 +34,21 @@ struct grug_value {
         bool bool_;
         int32_t i32;
         float f32;
-        char* string;
+        const char* string;
         uint64_t id;
     } value;
 };
 
 struct on_function {
-    char* name;
+    const char* name;
     void* fn_ptr;
     struct grug_value (*function)(void* fn_ptr, void* globals, struct grug_value* args);
 };
 
 struct grug_file {
-    char* name;
+    const char* name;
+    size_t globals_size;
+    grug_init_globals_fn_t init_globals_fn;
     struct on_function* on_fns;
     size_t on_fns_size;
 };
@@ -54,13 +58,9 @@ struct grug_mod_dir {
 
 	struct grug_mod_dir *dirs;
 	size_t dirs_size;
-	// size_t _dirs_capacity;
 
 	struct grug_file *files;
 	size_t files_size;
-	// size_t _files_capacity;
-
-	// bool _seen;
 };
 
 struct grug_backend {
@@ -70,20 +70,7 @@ struct grug_backend {
 
 static struct grug_backend *backend;
 
-// TODO: Unhardcode the directory and file layout
-struct grug_mod_dir grug_mods = {
-    .name = "mods",
-    .dirs = &(struct grug_mod_dir){
-        .name = "animals",
-        .files = &(struct grug_file){
-            .name = "labrador-Dog.grug",
-            .on_fns = NULL,
-            .on_fns_size = 1,
-        },
-        .files_size = 1,
-    },
-    .dirs_size = 1,
-};
+struct grug_mod_dir grug_mods;
 
 bool grug_init(grug_runtime_error_handler_t handler, const char *mod_api_json_path, const char *mods_dir_path, uint64_t on_fn_time_limit_ms, struct grug_backend *backend_) {
     (void)handler;
@@ -107,17 +94,16 @@ bool grug_regenerate_modified_mods(void) {
         "    }\n"
         "}\n";
 
-    fprintf(stderr, "before compile_file()\n");
+    struct grug_file *file = backend->compile_file("mods/animals/labrador-Dog.grug", file_contents);
 
-    // struct grug_file *file = backend->compile_file("mods/animals/labrador-Dog.grug", file_contents);
-    // (void)file; // TODO: REMOVE!
+    static struct grug_mod_dir dir = {0};
+    dir.name = "animals";
+    dir.files = file;
+    dir.files_size = 1;
 
-    backend->compile_file("mods/animals/labrador-Dog.grug", file_contents);
-
-    // TODO: REMOVE!
-    // fprintf(stderr, "file->name: %s\n", file->name);
-
-    // grug_mods.dirs[0].files[0].on_fns = file->on_fns;
+    grug_mods.name = "mods";
+    grug_mods.dirs = &dir;
+    grug_mods.dirs_size = 1;
 
     return false;
 }
