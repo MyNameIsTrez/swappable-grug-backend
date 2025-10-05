@@ -2,8 +2,9 @@
 
 ## Running the program
 
-1. Clone this repository and open it in VS Code.
-2. Hit `F5` to run the program.
+1. Clone this repository.
+2. Open the `c` or `python` directory in VS Code.
+3. Hit `F5` to run the program.
 
 ## Explanation
 
