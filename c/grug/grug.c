@@ -23,7 +23,7 @@ static void interpreter_execute(const grug_ast_t *ast, grug_value_t *args, size_
         int32_t age = args[0].as.i32;
         for (int32_t i = 0; i < age; ++i) {
             /* interpreter-level effect; in a real interpreter you'd call print_string AST node */
-            print_string("Woof!");
+            print_string("Woof from interpreter backend!");
         }
     }
 }
@@ -40,36 +40,36 @@ void grug_set_backend(grug_backend_t *backend) {
     current_backend = backend;
 }
 
-/* Load player's backend .so and, if found, register its provided symbols via mod_api_set_function().
+/* Load custom backend .so and, if found, register its provided symbols via mod_api_set_function().
    Note: grug.c does not hardcode function names — it simply iterates the backend's exported table. */
-void grug_load_player_backend(const char *so_path) {
+void grug_load_custom_backend(const char *so_path) {
     void *handle = dlopen(so_path, RTLD_NOW);
     if (!handle) {
-        printf("[bindings] No player backend found at %s — staying with interpreter\n", so_path);
+        printf("[bindings] No custom backend found at %s — staying with interpreter\n", so_path);
         grug_set_backend(&default_interpreter_backend);
         return;
     }
 
-    grug_backend_t *player_backend = dlsym(handle, "grug_backend_instance");
-    if (!player_backend) {
-        printf("[bindings] player backend missing symbol grug_backend_instance — using interpreter\n");
+    grug_backend_t *custom_backend = dlsym(handle, "grug_backend_instance");
+    if (!custom_backend) {
+        printf("[bindings] custom backend missing symbol grug_backend_instance — using interpreter\n");
         grug_set_backend(&default_interpreter_backend);
         return;
     }
 
     /* override interpreter trampolines with any native symbols the backend provides */
-    if (player_backend->symbols && player_backend->num_symbols > 0) {
-        for (size_t i = 0; i < player_backend->num_symbols; ++i) {
-            const char *name = player_backend->symbols[i].name;
-            void *fn = player_backend->symbols[i].fn;
+    if (custom_backend->symbols && custom_backend->num_symbols > 0) {
+        for (size_t i = 0; i < custom_backend->num_symbols; ++i) {
+            const char *name = custom_backend->symbols[i].name;
+            void *fn = custom_backend->symbols[i].fn;
             /* delegate actual per-name binding to mod_api.c (generated) */
             mod_api_set_function(name, fn);
             printf("[bindings] Backend override: %s -> %p\n", name, fn);
         }
     }
 
-    grug_set_backend(player_backend);
-    printf("[bindings] Using backend %s\n", player_backend->name);
+    grug_set_backend(custom_backend);
+    printf("[bindings] Using backend %s\n", custom_backend->name);
 }
 
 /* initialization & minimal frontend simulation */

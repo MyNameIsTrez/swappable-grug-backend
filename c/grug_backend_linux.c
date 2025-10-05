@@ -9,9 +9,9 @@
 static void native_on_spawn_Dog(int32_t age_in_years) {
     printf("[native backend] Dog spawned, age=%d\n", age_in_years);
 
-    /* Since this is a compiler backend, we can directly call game functions */
+    /* Since this is a native backend, we can directly call game functions */
     for (int32_t i = 0; i < age_in_years; ++i) {
-        print_string("WOOF from native backend!");
+        print_string("Woof from native backend!");
     }
 }
 
@@ -26,7 +26,7 @@ static grug_symbol_t symbols[] = {
 #pragma GCC diagnostic pop
 
 /* ------------------------------------------------------------------
-   No-op execute (not needed for compiler backends)
+   No-op execute (not needed for native backends)
    ------------------------------------------------------------------ */
 static void backend_execute(const grug_ast_t *ast, grug_value_t *args, size_t argc) {
     (void)args;

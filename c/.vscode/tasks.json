@@ -11,7 +11,7 @@
             "group": "build"
         },
         {
-            "label": "Compile compiler backend",
+            "label": "Compile native backend",
             "dependsOn": [
                 "Compile game",
                 "Compile backend.so"
@@ -42,15 +42,7 @@
                 "-Wpedantic",
                 "-Wfatal-errors",
                 "-g",
-                // "-fsanitize=address,undefined",
             ],
-            // "problemMatcher": [
-            //     "$tsc"
-            // ],
-            // "presentation": {
-            //     "reveal": "always",
-            //     "clear": true
-            // },
             "group": "build",
             "hide": true
         },
@@ -70,15 +62,7 @@
                 "-g",
                 "-shared",
                 "-fPIC",
-                // "-fsanitize=address,undefined",
             ],
-            // "problemMatcher": [
-            //     "$tsc"
-            // ],
-            // "presentation": {
-            //     "reveal": "always",
-            //     "clear": true
-            // },
             "group": "build",
             "hide": true
         }

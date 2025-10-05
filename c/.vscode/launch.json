@@ -27,7 +27,7 @@
             ]
         },
         {
-            "name": "Compiler backend",
+            "name": "Native backend",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/game",
@@ -37,7 +37,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "Compile compiler backend",
+            "preLaunchTask": "Compile native backend",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
