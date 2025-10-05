@@ -2,7 +2,32 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Compile",
+            "label": "Compile interpreter backend",
+            "dependsOn": [
+                "Remove backend.so",
+                "Compile game"
+            ],
+            "dependsOrder": "sequence",
+            "group": "build"
+        },
+        {
+            "label": "Compile compiler backend",
+            "dependsOn": [
+                "Compile game",
+                "Compile backend.so"
+            ],
+            "dependsOrder": "sequence",
+            "group": "build"
+        },
+        {
+            "label": "Remove backend.so",
+            "command": "rm -f backend.so",
+            "type": "shell",
+            "group": "build",
+            "hide": true
+        },
+        {
+            "label": "Compile game",
             "command": "gcc",
             "type": "shell",
             "args": [
@@ -19,14 +44,43 @@
                 "-g",
                 // "-fsanitize=address,undefined",
             ],
-            "problemMatcher": [
-                "$tsc"
+            // "problemMatcher": [
+            //     "$tsc"
+            // ],
+            // "presentation": {
+            //     "reveal": "always",
+            //     "clear": true
+            // },
+            "group": "build",
+            "hide": true
+        },
+        {
+            "label": "Compile backend.so",
+            "command": "gcc",
+            "type": "shell",
+            "args": [
+                "grug_backend_linux.c",
+                "-o",
+                "backend.so",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-Wpedantic",
+                "-Wfatal-errors",
+                "-g",
+                "-shared",
+                "-fPIC",
+                // "-fsanitize=address,undefined",
             ],
-            "presentation": {
-                "reveal": "always",
-                "clear": true
-            },
-            "group": "build"
+            // "problemMatcher": [
+            //     "$tsc"
+            // ],
+            // "presentation": {
+            //     "reveal": "always",
+            //     "clear": true
+            // },
+            "group": "build",
+            "hide": true
         }
     ]
 }

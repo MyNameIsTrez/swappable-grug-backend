@@ -16,12 +16,12 @@ static grug_ast_t loaded_ast = {
 static grug_backend_t *current_backend = NULL;
 
 /* default interpreter backend implementation (keeps demo tiny) */
-static void interpreter_execute(const grug_ast_t *ast, grug_value_t *args, int argc) {
+static void interpreter_execute(const grug_ast_t *ast, grug_value_t *args, size_t argc) {
     printf("[backend: interpreter] Executing %s::%s\n",
            ast->entity_name, ast->function_name);
     if (argc == 1 && args[0].tag == GRUG_TAG_I32) {
-        int age = args[0].as.i32;
-        for (int i = 0; i < age; ++i) {
+        int32_t age = args[0].as.i32;
+        for (int32_t i = 0; i < age; ++i) {
             /* interpreter-level effect; in a real interpreter you'd call print_string AST node */
             print_string("Woof!");
         }
@@ -57,12 +57,9 @@ void grug_load_player_backend(const char *so_path) {
         return;
     }
 
-    /* first, install trampolines (default interpreter behavior) so we have sensible defaults */
-    mod_api_register_trampolines();
-
-    /* next, override with any native symbols the backend provides */
+    /* override interpreter trampolines with any native symbols the backend provides */
     if (player_backend->symbols && player_backend->num_symbols > 0) {
-        for (int i = 0; i < player_backend->num_symbols; ++i) {
+        for (size_t i = 0; i < player_backend->num_symbols; ++i) {
             const char *name = player_backend->symbols[i].name;
             void *fn = player_backend->symbols[i].fn;
             /* delegate actual per-name binding to mod_api.c (generated) */
@@ -95,7 +92,7 @@ grug_ast_t *grug_get_ast_for(const char *entity, const char *fn) {
     return NULL;
 }
 
-void grug_call_backend(const grug_ast_t *ast, grug_value_t *args, int argc) {
+void grug_call_backend(const grug_ast_t *ast, grug_value_t *args, size_t argc) {
     if (!ast || !current_backend || !current_backend->execute) {
         printf("[bindings] no backend/ast available\n");
         return;

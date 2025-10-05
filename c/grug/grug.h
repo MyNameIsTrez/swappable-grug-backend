@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 
 // Generic tagged value for interpreter calls
@@ -32,15 +33,15 @@ typedef struct grug_symbol {
 typedef struct grug_backend {
     const char *name;
     grug_symbol_t *symbols;
-    int num_symbols;
+    size_t num_symbols;
     // Generic backend execution entrypoint (keeps demo simple)
-    void (*execute)(const grug_ast_t *ast, grug_value_t *args, int argc);
+    void (*execute)(const grug_ast_t *ast, grug_value_t *args, size_t argc);
 } grug_backend_t;
 
 /* bindings/frontend API (minimal) */
 void grug_init(void);
 void grug_load_mods(void);
 grug_ast_t *grug_get_ast_for(const char *entity, const char *fn);
-void grug_call_backend(const grug_ast_t *ast, grug_value_t *args, int argc);
+void grug_call_backend(const grug_ast_t *ast, grug_value_t *args, size_t argc);
 void grug_load_player_backend(const char *so_path);
 void grug_set_backend(grug_backend_t *backend);

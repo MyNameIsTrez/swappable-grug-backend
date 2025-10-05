@@ -9,7 +9,7 @@ int main(void) {
     grug_init();
 
     /* try to load a player-provided backend (overrides trampolines if it provides symbols) */
-    grug_load_player_backend("./player_backend.so");
+    grug_load_player_backend("./backend.so");
 
     /* load mods (mock) */
     grug_load_mods();
