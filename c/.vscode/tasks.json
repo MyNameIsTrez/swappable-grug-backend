@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile",
+            "command": "gcc",
+            "type": "shell",
+            "args": [
+                "main.c",
+                "grug/grug.c",
+                "-o",
+                "game",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-Wpedantic",
+                "-Wfatal-errors",
+                "-g",
+                // "-fsanitize=address,undefined",
+            ],
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "clear": true
+            },
+            "group": "build"
+        }
+    ]
+}
