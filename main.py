@@ -23,9 +23,11 @@ labrador_file = animals_mod.files[0]
 # This creates an entity, and initializes its globals
 # The 0 we pass stands for entity ID 0
 entity_globals = labrador_file.create_entity(0)
+# labrador = labrador_file.create_entity() # TODO: Use this instead
 
 # This labrador is 3 years old
 labrador_file.on_fns[0].fn_ptr(entity_globals.c_array, 3)
+# labrador.spawn(3) # TODO: Use this instead
 
 # TODO: Write tests that assert all subpackages are fully overridable.
 # print(f"is_native: {grug.is_native()}")
